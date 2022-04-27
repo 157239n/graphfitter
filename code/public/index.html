@@ -99,6 +99,10 @@
                 <label class="toggle"><input type="checkbox" id="debug_t"><span></span></label>
                 <div style="margin-left: 10px">Debug mode</div>
               </div>
+              <div style="display: flex; flex-direction: row; margin-top: 20px">
+                <label class="toggle"><input type="checkbox" id="snap_t"><span></span></label>
+                <div style="margin-left: 10px">Snap to geometry</div>
+              </div>
             </div>
           </div>
         </div>
@@ -107,7 +111,7 @@
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js" integrity="sha512-NxocnqsXP3zm0Xb42zqVMvjQIktKEpTIbCXXyhBPxqGZHqhcOXHs4pXI/GoZ8lE+2NJONRifuBpi9DxC58L0Lw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script type="module">
-    import { func, vg, Point, Series, Axis, AutoIncrement, MovingAverage, download, toast } from "/k1js/index.js";
+    import { func, vg, Point, Series, Axis, AutoIncrement, MovingAverage, download, toast, convFlat } from "/k1js/index.js";
     let components = [];
     /**
      * So, how this works is that there'll be 3 different reference frames that a point/vector exists in:
@@ -131,6 +135,7 @@
       axes: [], // list of Axis objects
       focusedSeries: undefined,
       inCanvas: false, // whether cursor is in canvas or not
+      snap: true, // whether to snap points to underlying scene
       mvx: 0,
       mvy: 0,
       debug: true, // displays extra stuff on screen
@@ -145,8 +150,10 @@
     Series.node = document.querySelector("#series");
     window.ctx = ctx;
     let debug_t = document.querySelector("#debug_t");
+    let snap_t = document.querySelector("#snap_t");
     function intermediaries() {
       ctx.debug = debug_t.checked;
+      ctx.snap = snap_t.checked;
       Axis.intermediaries();
 
       let p = ctx.p;
@@ -238,11 +245,15 @@
     ctx.example = () => {
       fetch("/moody.json").then(res => res.json()).then(setState);
     }
-    let getState = () => JSON.stringify({ img: ctx.img ? ctx.img.canvas.toDataURL() : null, deg: ctx.deg, trans: ctx.trans, axes: Axis.json, series: Series.json });
+    let getState = () => JSON.stringify({ img: ctx.img ? ctx.img.canvas.toDataURL() : null, deg: ctx.deg, trans: ctx.trans, snap: ctx.snap, debug: ctx.debug, vrS: ctx.vrS, vrT: ctx.vrT, axes: Axis.json, series: Series.json });
     let setState = (j) => {
       if (j.img !== null) loadBase64(j.img, false);
       set_deg.value = j.deg;
       set_trans.value = j.trans;
+      ctx.vrS = j.vrS ?? 1;
+      ctx.vrT = j.vrT ?? [0, 0];
+      snap_t.checked = j.snap ?? false;
+      debug_t.checked = j.debug ?? false;
       set_deg.oninput();
       set_trans.oninput();
       Axis.json = j.axes;
@@ -294,8 +305,16 @@
 
     function loadBase64(s, init=true) {
       ctx.p.loadImage(s, (img) => {
+        img.loadPixels();
+        let k1 = [0, -1, 0, -1, 4, -1, 0, -1, 0];
+        // let newImg = new p5.Image(img.width-2, img.height-2);
+        // newImg.loadPixels();
+        // convFlatImg(img.pixels, newImg.pixels, k1, img.width, img.height);
+        // newImg.updatePixels();
+        // ctx.img = newImg;
+        ctx.snapImg = convFlat(img.pixels, k1, img.width, img.height);
         ctx.img = img;
-        if (init) Axis.initDims(img.width, img.height);
+        if (init) Axis.initDims(ctx.img.width, ctx.img.height);
       });
     }
 

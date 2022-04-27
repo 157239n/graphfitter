@@ -68,52 +68,74 @@ export function vg(ctx) {
   };
 }
 
-/**
- * Another virtual to graph translation. Works better, not totally bogus, but not
- * exactly what I wanted.
- */
-function vgOld2(ctx) {
-  if (ctx.aX.p1.js === undefined) return;
-  let [aX1, aX2] = [ctx.aX.p1.js, ctx.aX.p2.js];
-  let [aY1, aY2] = [ctx.aY.p1.js, ctx.aY.p2.js];
-  let [daX, daY] = [sub(aX2, aX1), sub(aY2, aY1)];
-  let [m2daX, m2daY] = [mag(daX) ** 2, mag(daY) ** 2];
-  function translate(vx, vy, out = undefined) {
-    let m = ((vx - aX1.x) * daX.x + (vy - aX1.y) * daX.y) / m2daX;
-    let n = ((vx - aY1.x) * daY.x + (vy - aY1.y) * daY.y) / m2daY;
-    let gx = ctx.aX.p1.value + (ctx.aX.p2.value - ctx.aX.p1.value) * m;
-    let gy = ctx.aY.p1.value + (ctx.aY.p2.value - ctx.aY.p1.value) * n;
-    return [gx, gy];
+let conv = (img, k3x3) => {
+  let newImg = []
+  for (let j = 0; j < img.height-2; j++)
+    newImg.push(new Array(img.width-2).fill(0));
+  for (let kj = 0; kj < 3; kj++) {
+    for (let ki = 0; ki < 3; ki++) {
+      let e = k3x3[kj][ki];
+      for (let j = 0; j < newImg.height; j++) {
+        for (let i = 0; i < newImg.width; i++) {
+          newImg[j][i] += img[j+kj][i+ki];
+        }
+      }
+    }
   }
-  ctx.vgT = translate;
+  return newImg;
 }
 
-/**
- * Old virtual to graph translation. Totally bogus underlying math
- */
-function vgOld(ctx) {
-  function translate(vx, vy, out = undefined) {
-    let a = ctx.aX.p2.js.x - ctx.aX.p1.js.x;
-    let b = ctx.aY.p2.js.x - ctx.aY.p1.js.x;
-    let c = ctx.aX.p2.js.y - ctx.aX.p1.js.y;
-    let d = ctx.aY.p2.js.y - ctx.aY.p1.js.y;
-    let det = 1.0 / (a * d - b * c);
+export let convFlatOrig = (img, newImg, k3x3, w, h) => {
+  for (let kj = 0; kj < 3; kj++)
+    for (let ki = 0; ki < 3; ki++) {
+      let e = k3x3[kj*3+ki];
+      for (let j = 0; j < h-2; j++)
+        for (let i = 0; i < w-2; i++) {
+          let [a, b] = [j*(w-2)+i, (j+kj)*w+(i+ki)]
+          // newImg[a*4+0] += e*img[b*4+0];
+          // newImg[a*4+1] += e*img[b*4+1];
+          // newImg[a*4+2] += e*img[b*4+2];
+          // newImg[a*4+3] += e*img[b*4+3];
+          newImg[a*4+0] += e*(img[b*4+0] + img[b*4+1] + img[b*4+2] + img[b*4+3]);
+          newImg[a*4+1] = newImg[a*4+0];
+          newImg[a*4+2] = newImg[a*4+0];
+          newImg[a*4+3] = newImg[a*4+0];
+        }
+    }
+  return newImg;
+}
 
-    vx = vx - (ctx.aX.p1.js.x + ctx.aY.p1.js.x);
-    vy = vy - (ctx.aX.p1.js.y + ctx.aY.p1.js.y);
-    // Without these 2 lines below, it's not accurate, for some reason.
-    // Linear algebra says that image width and height info should not
-    // matter, but for some reason it matters here.
+export let convFlatImg = (img, newImg, k3x3, w, h) => {
+  for (let j = 0; j < h-2; j++)
+    for (let i = 0; i < w-2; i++){
+      let a = j*(w-2)+i;
+      let s = 0;
+      for (let kj = 0; kj < 3; kj++)
+        for (let ki = 0; ki < 3; ki++) {
+          let b = (j+kj)*w+(i+ki);
+          s += k3x3[kj*3+ki]*(img[b*4+0] + img[b*4+1] + img[b*4+2] + img[b*4+3]);
+        }
+      newImg[a*4+0] = s;
+      newImg[a*4+1] = s;
+      newImg[a*4+2] = s;
+      newImg[a*4+3] = s;
+    }
+  return newImg;
+}
 
-    // vx += ctx.img.width * 0.1;
-    // vy += ctx.img.height * 0.9;
-    vx += ctx.img.width * 0;
-    vy += ctx.img.height * 1;
-    let m = det * (d * vx - b * vy);
-    let n = det * (-c * vx + a * vy);
-    let gx = ctx.aX.p1.value + (ctx.aX.p2.value - ctx.aX.p1.value) * m;
-    let gy = ctx.aY.p1.value + (ctx.aY.p2.value - ctx.aY.p1.value) * n;
-    return [gx, gy, m, n];
-  }
-  ctx.vgT = translate;
+export let convFlat = (img, k3x3, w, h) => {
+  let arr = []
+  for (let j = 0; j < h-2; j++) arr.push(new Array(w-2).fill(0))
+  for (let j = 0; j < h-2; j++)
+    for (let i = 0; i < w-2; i++){
+      let a = j*(w-2)+i;
+      let s = 0;
+      for (let kj = 0; kj < 3; kj++)
+        for (let ki = 0; ki < 3; ki++) {
+          let b = (j+kj)*w+(i+ki);
+          s += k3x3[kj*3+ki]*(img[b*4+0] + img[b*4+1] + img[b*4+2] + img[b*4+3]);
+        }
+      arr[j][i] = s;
+    }
+  return arr;
 }
