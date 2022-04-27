@@ -1,7 +1,7 @@
 
 ![](screenshot.png)
 
-A service that allows you to paste in a graph, set the axes, add in multiple series and fit them to polynomials
+A service at [graphfitter.com](https://graphfitter.com) that allows you to paste in a graph, set the axes, add in multiple series and fit them to polynomials
 
 ## Features
 
