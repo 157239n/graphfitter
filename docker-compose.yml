@@ -1,0 +1,13 @@
+version: "3.5"
+services:
+    graphfitter:
+        build: .
+        container_name: graphfitter
+        restart: always
+        networks:
+            - proxy_graphfitter
+        volumes:
+            - ./code:/var/www/html
+networks:
+    proxy_graphfitter:
+        external: true

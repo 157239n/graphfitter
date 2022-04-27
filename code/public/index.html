@@ -1,0 +1,432 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/rss/index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;1,100;1,300;1,400;1,700&display=swap" rel="stylesheet" />
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({tex2jax: {inlineMath: [['$$$','$$$'], ['\\(','\\)']]}});
+    </script>
+    <title>Home | graphfitter</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="header" style="display: none">
+        <a href="#function">function</a>
+        <a href="#imagenet">imagenet</a>
+        <a href="#rl-intro">rl-intro</a>
+        <a href="#other">other</a>
+      </div>
+      <div id="main">
+        <div id="sketchWrapper">
+          <div id="sketch"></div>
+          <div id="overlay" style="display: flex; flex-direction: row">
+            <div style="flex: 1"></div>
+            <div style="display: flex; flex-direction: column">
+              <div style="margin: 20px">
+                <div class="btn" onclick="ctx.clearSketch()" title="Clear current sketch"><span><img src="rss/trash.svg" width="18" height="18" /></span></div>
+                <div class="btn" onclick="ctx.autoSave(true)" title="Save temporarily to cloud" style="margin-top: 15px;"><span><img src="rss/cloud-upload.svg" width="18" height="18" /></span></div>
+                <div class="btn" onclick="ctx.downloadJson()" title="Export to file" style="margin-top: 15px;"><span><img src="rss/download.svg" width="18" height="18" /></span></div>
+                <div class="btn" onclick="ctx.uploadJson()" title="Load from file" style="margin-top: 15px;"><span><img src="rss/upload.svg" width="18" height="18" /></span></div>
+                <div class="btn" onclick="ctx.expandAxis()" title="Expand axis to edge of image" style="margin-top: 15px;"><span><img src="rss/expand.svg" width="18" height="18" /></span></div>
+                <div class="btn" onclick="ctx.example()" title="Loads an example sketch" style="margin-top: 15px;"><span><img src="rss/document.svg" width="18" height="18" /></span></div>
+              </div>
+              <div style="flex: 1"></div>
+              <div style="margin: 20px">
+                <div class="btn" onclick="ctx.p.mouseWheel({'delta': -1, 'btns': true})" title="Zoom in" style="margin-bottom: 15px"><span>+</span></div>
+                <div class="btn" onclick="ctx.p.mouseWheel({'delta': 1,  'btns': true})" title="Zoom out"><span>-</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="sideBar" style="flex: 1; position: relative; overflow: auto">
+          <div style="display: flex; flex-direction: column; position: absolute; width: 100%">
+            <div class="card">1. Axis</div>
+            <!-- prettier-ignore -->
+            <div class="cardContent" id="axisContent">
+              <div style="display: flex; flex-direction: row">
+                <div style="font-size: 1.1em">Horizontal axis</div>
+                <div style="flex: 1"></div>
+                <label class="toggle"><input type="checkbox" id="aX_t"><span></span></label>
+                <div style="margin-left: 10px">Log scale</div>
+              </div>
+              <div style="display: flex; flex-direction: row; margin-left: 20px; margin-top: 10px;">
+                <div style="flex: 1; flex-direction: column; margin-right: 20px" id="aX_p1" class="axp">
+                  <div class="textBox"><div>Point&nbsp;1</div><input type="text" value="2" /></div>
+                </div>
+                <div style="flex: 1; flex-direction: column;" id="aX_p2" class="axp">
+                  <div class="textBox"><div>Point&nbsp;2</div><input type="text" value="20" /></div>
+                </div>
+              </div>
+              <div style="margin-top: 20px"></div>
+              <div style="display: flex; flex-direction: row">
+                <div style="font-size: 1.1em">Vertical axis</div>
+                <div style="flex: 1"></div>
+                <label class="toggle"><input type="checkbox" id="aY_t"><span></span></label>
+                <div style="margin-left: 10px">Log scale</div>
+              </div>
+              <div style="display: flex; flex-direction: row; margin-left: 20px; margin-top: 10px;">
+                <div style="flex: 1; flex-direction: column; margin-right: 20px" id="aY_p1" class="axp">
+                  <div class="textBox"><div>Point&nbsp;1</div><input type="text" value="1" /></div>
+                </div>
+                <div style="flex: 1; flex-direction: column;" id="aY_p2" class="axp">
+                  <div class="textBox"><div>Point&nbsp;2</div><input type="text" value="10" /></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">2. Data</div>
+            <div class="cardContent" id="dataContent">
+              <div id="series"></div>
+              <div onclick="ctx.p.newSeries()">New series</div>
+            </div>
+            <div class="card">3. Export</div>
+            <div class="cardContent" id="exportContent">
+              <div>Raw series data</div>
+              <textarea id="ex-raw" rows="10"></textarea>
+              <div>Polyfit functions</div>
+              <textarea id="ex-polyfit" rows="10"></textarea>
+            </div>
+            <div class="card">4. Settings</div>
+            <div class="cardContent" id="settingsContent">
+              <div>Polyfit degree: <span>2</span></div>
+              <input id="set-deg" type="range" min="1" max="20" value="2" />
+              <div>Silkscreen transparency: <span>3</span></div>
+              <input id="set-trans" type="range" min="0" max="255" value="150" />
+              <input id="set-upload" type="file" style="display: none" />
+              <div style="display: flex; flex-direction: row; margin-top: 20px">
+                <label class="toggle"><input type="checkbox" id="debug_t"><span></span></label>
+                <div style="margin-left: 10px">Debug mode</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js" integrity="sha512-NxocnqsXP3zm0Xb42zqVMvjQIktKEpTIbCXXyhBPxqGZHqhcOXHs4pXI/GoZ8lE+2NJONRifuBpi9DxC58L0Lw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module">
+    import { func, vg, Point, Series, Axis, AutoIncrement, MovingAverage, download, toast } from "/k1js/index.js";
+    let components = [];
+    /**
+     * So, how this works is that there'll be 3 different reference frames that a point/vector exists in:
+     * - Graph space. Defined when the 2 axis is selected
+     * - Virtual pixel space. Defined when image is loaded
+     * - Real pixel space. Defined when website is loaded
+     */
+    let tmp = { mouse: false, node: undefined, js: undefined, textNode: undefined, value: 0 };
+    let ctx = {
+      p: undefined,
+      canvas: undefined,
+      width: 0,
+      height: 0,
+      img: undefined,
+      trans: 0,
+      deg: 0,
+      vrS: 1, // virtual -> real scale
+      vrT: [0, 0], // virtual -> real translation
+      aps: undefined, // axis points
+      lock: false, // only 1 item is allowed to interact with mouse at 1 time
+      axes: [], // list of Axis objects
+      focusedSeries: undefined,
+      inCanvas: false, // whether cursor is in canvas or not
+      mvx: 0,
+      mvy: 0,
+      debug: true, // displays extra stuff on screen
+      Series: Series,
+      Point: Point,
+      Axis: Axis,
+      ex: { raw: document.querySelector("#ex-raw"), polyfit: document.querySelector("#ex-polyfit") },
+      signals: { img: false, log: false, deg: false, trans: false, dragging: false },
+      fitLock: false,
+      avgs: {movedX: new MovingAverage(0), movedY: new MovingAverage(0), frameRate: new MovingAverage(0)}
+    };
+    Series.node = document.querySelector("#series");
+    window.ctx = ctx;
+    let debug_t = document.querySelector("#debug_t");
+    function intermediaries() {
+      ctx.debug = debug_t.checked;
+      Axis.intermediaries();
+
+      let p = ctx.p;
+      ctx.mvx = (p.mouseX - ctx.vrT[0]) / ctx.vrS; // mouseX virtual
+      ctx.mvy = (p.mouseY - ctx.vrT[1]) / ctx.vrS; // mouseY virtual
+      ctx.avgs.movedX.value = p.movedX;
+      ctx.avgs.movedY.value = p.movedY;
+      ctx.avgs.frameRate.value = p.frameRate();
+      if (ctx.canvas !== undefined) ctx.inCanvas = 0 <= p.mouseX && p.mouseX < ctx.canvas.width && 0 <= p.mouseY && p.mouseY < ctx.canvas.height;
+      vg(ctx);
+    }
+    function genFit(_coeffs) {
+      let coeffs = [..._coeffs];
+      let n = coeffs.length;
+      let lx = Axis.X.log ? Math.log : (e => e);
+      let ly = Axis.Y.log ? Math.exp : (e => e);
+      function inner(x) {
+        let answer = 0; x = lx(x);
+        for (let i in coeffs) answer += coeffs[i] * x ** (n - i - 1);
+        return ly(answer);
+      }
+      return inner;
+    }
+    function interact() {
+      Point.apply((p) => p.interact());
+      Series.apply((s) => s.interact());
+      Axis.interact();
+      let seriesChanged = Series.moved || Series.changed || Axis.moved || Axis.changed || ctx.signals.img || Axis.logChanged || Axis.valueChanged;
+      if (seriesChanged) ctx.ex.raw.textContent = Series.graphDataS;
+      if (seriesChanged || ctx.signals.deg) {
+        if (!ctx.fitLock) {
+          ctx.fitLock = true;
+          setTimeout(() => {
+            let data = {};
+            for (const series of Series.list) data[series.label] = series.graphDataAdj;
+            fetch("/polyfit/fit", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ deg: ctx.deg, data }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (ctx.debug) console.log("Fitting data from server:", data);
+                let s = "", tallyS = "fs = [";
+                for (const k of Series.list.map(s => s.label)) {
+                  let coeffs = data[k];
+                  if (!coeffs) continue;
+                  s += `def ${k}f(x): ${Axis.X.log ? "x = np.log(x); " : ""}return ` + (Axis.Y.log ? "2.71828182**(" : "") + coeffs.map((coeff, i) => `${coeff}*x**${coeffs.length - i - 1}`).join(" + ") + (Axis.Y.log ? ")" : "") + "\n";
+                  Series.dict[k].fitFn = genFit(coeffs);
+                  tallyS += `${k}f, `;
+                }
+                ctx.ex.polyfit.textContent = s + tallyS + "]";
+                ctx.fitLock = false;
+              });
+          }, 100);
+        }
+      }
+    }
+    function clearSignal(s) {
+      for (const k in s)
+        if (typeof s[k] === "boolean") s[k] = false;
+        else clearSignals(s[k]);
+    }
+    let set_upload = document.querySelector("#set-upload");
+    ctx.expandAxis = () => {
+      if (ctx.img !== undefined) {
+        let w = ctx.img.width;
+        let h = ctx.img.height;
+        Axis.X.p1.js.xy = [0, h];
+        Axis.X.p2.js.xy = [w, h];
+        Axis.Y.p1.js.xy = [0, h];
+        Axis.Y.p2.js.xy = [0, 0];
+        Axis.X.p1.value = 1;
+        Axis.X.p2.value = w;
+        Axis.Y.p1.value = 1;
+        Axis.Y.p2.value = h;
+        Axis.X.log = false;
+        Axis.Y.log = false;
+      } else toast.display("No image on the screen yet!");
+    }
+    ctx.clearSketch = () => {
+      ctx.img = undefined;
+      ctx.signals.img = true;
+      Series.clear();
+      Axis.initDims();
+    }
+    ctx.example = () => {
+      fetch("/moody.json").then(res => res.json()).then(setState);
+    }
+    let getState = () => JSON.stringify({ img: ctx.img ? ctx.img.canvas.toDataURL() : null, deg: ctx.deg, trans: ctx.trans, axes: Axis.json, series: Series.json });
+    let setState = (j) => {
+      if (j.img !== null) loadBase64(j.img, false);
+      set_deg.value = j.deg;
+      set_trans.value = j.trans;
+      set_deg.oninput();
+      set_trans.oninput();
+      Axis.json = j.axes;
+      Series.json = [ctx, j.series];
+    }
+    ctx.autoSave = (announces=false) =>
+      fetch("/polyfit/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: getState(),
+      }).then(res => {
+        if (ctx.debug) console.log("Autosave successful")
+        if (announces) toast.display("Saved to cloud", 1000)
+      });
+    setInterval(ctx.autoSave, 10*1000);
+    ctx.autoLoad = () => {
+      fetch("/polyfit/load", {
+        method: "POST",
+      }).then(res => res.json()).then(data => {
+        if (Object.keys(data).length > 0) setState(data);
+      });
+    };
+    setTimeout(ctx.autoLoad, 0);
+    ctx.downloadJson = () => download(getState());
+    ctx.uploadJson = () => set_upload.click();
+    let handleUpload = () => {
+      if (set_upload.files.length == 0) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          let j = JSON.parse(e.target.result);
+          set_upload.value = null;
+          setState(j);
+        } catch (e) {
+          toast.display("Can't upload file");
+          console.log("Can't parse json", e);
+          set_upload.value = null;
+        }
+      };
+      reader.readAsText(set_upload.files[0]);
+      set_upload.value = null;
+    };
+    setInterval(handleUpload, 100);
+    Axis.X = new Axis(ctx);
+    Axis.Y = new Axis(ctx);
+    Axis.init();
+
+    function loadBase64(s, init=true) {
+      ctx.p.loadImage(s, (img) => {
+        ctx.img = img;
+        if (init) Axis.initDims(img.width, img.height);
+      });
+    }
+
+    document.onpaste = (event) => {
+      let items = (event.clipboardData || event.originalEvent.clipboardData).items;
+      for (let idx in items) {
+        let item = items[idx];
+        if (item.kind === "file") {
+          let reader = new FileReader();
+          reader.onload = (event) => loadBase64(event.target.result);
+          reader.readAsDataURL(item.getAsFile());
+        }
+      }
+    };
+    let [set_deg, set_trans] = Array.from(document.querySelectorAll("#settingsContent > input")).slice(0, 2);
+    let [set_deg_val, set_trans_val] = Array.from(document.querySelectorAll("#settingsContent > div > span")).slice(0, 2);
+    set_deg.oninput = () => {
+      ctx.deg = parseFloat(set_deg.value);
+      set_deg_val.innerHTML = ctx.deg;
+      ctx.signals.deg = true;
+    };
+    set_deg.oninput();
+    set_trans.oninput = () => {
+      ctx.trans = parseFloat(set_trans.value);
+      set_trans_val.innerHTML = ctx.trans;
+      ctx.signals.trans = true;
+    };
+    set_trans.oninput();
+    document.addEventListener("dblclick", e => e.stopPropagation());
+    new p5((p) => {
+      /** @type {p5} p */
+      ctx.p = p;
+      p.setup = () => p.createCanvas(600, 600);
+      p.draw = () => {
+        p.background(150);
+        intermediaries();
+        interact();
+        // starts drawing stuff
+        p.push();
+        p.translate(...ctx.vrT);
+        p.scale(ctx.vrS);
+        if (ctx.img !== undefined) {
+          p.image(ctx.img, 0, 0);
+          p.fill(255, 255, 255, 255-ctx.trans);
+          p.rect(0, 0, ctx.img.width, ctx.img.height);
+        } else {
+          p.textSize(30);
+          p.text("Paste in an image to get started", 150, 150);
+        }
+        Point.apply((p) => p.draw());
+        Axis.apply((ax) => ax.draw());
+        Series.apply((s) => s.draw());
+        if (Series.list.length > 0 && Series.list.at(-1).points.length === 0) {
+          p.textSize(30);
+          p.noStroke();
+          p.text("Click anywhere to add the first point of the\nseries. Press <escape> to finish", 300, 300)
+        }
+        p.pop();
+        let [mgx, mgy] = ctx.vgT(ctx.mvx, ctx.mvy);
+        // faint red circle at cursor
+        let r = p.mouseIsPressed ? 20 : 12;
+        p.push();
+        p.fill(255, 0, 0, 50);
+        p.noStroke();
+        p.ellipse(p.mouseX, p.mouseY, r, r);
+        p.textSize(18);
+        //p.noStroke();
+        p.stroke(255, 255, 255);
+        p.strokeWeight(0.1);
+        p.fill(0, 0, 0);
+        p.text(`${mgx.toPrecision(4)}, ${mgy.toPrecision(4)}`, p.mouseX + 15, p.mouseY + 20);
+        p.pop();
+        if (ctx.debug) {
+          p.text(`real frame: ${p.mouseX}, ${p.mouseY}`, 15, 20);
+          p.text(`virtual frame: ${ctx.mvx.toPrecision(4)}, ${ctx.mvy.toPrecision(4)}`, 15, 40);
+          p.text(`graph frame: ${mgx.toPrecision(4)}, ${mgy.toPrecision(4)}`, 15, 60);
+          p.text(`canvas size: ${ctx.width}, ${ctx.height}`, 15, 80);
+          p.text(`frame rate: ${ctx.avgs.frameRate.value.toPrecision(2)}`, 15, 100);
+          p.text(`lock: ${ctx.lock}`, 15, 120);
+          p.text(`fit lock: ${ctx.fitLock}`, 15, 140);
+          p.text(`inside canvas: ${ctx.inCanvas}`, 15, 160);
+          p.text(`mouse pressed: ${ctx.p.mouseIsPressed}`, 15, 180);
+          p.text(`movedXY avg: ${ctx.avgs.movedX.value.toFixed(3)} ${ctx.avgs.movedY.value.toFixed(3)}`, 15, 200);
+          p.text(`mouse dragging: ${ctx.signals.dragging}`, 15, 220);
+        }
+        // if (ctx.vgT !== undefined)
+        //   console.log([ctx.mvx, ctx.mvy], ctx.vgT({x: ctx.mvx, y: ctx.mvy}));
+        clearSignal(ctx.signals);
+      };
+      p.windowResized = () => {
+        if (ctx.canvas !== undefined) p.resizeCanvas(ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+        ctx.width = ctx.canvas.clientWidth;
+        ctx.height = ctx.canvas.clientHeight;
+      };
+      p.keyReleased = (e) => {
+        if (p.key === "Escape" && ctx.focusedSeries !== undefined) ctx.focusedSeries.unfocus();
+      };
+      p.mouseWheel = (e) => {
+        if (ctx.inCanvas) {
+          let rx = e.btns ? ctx.width / 2 : p.mouseX;
+          let ry = e.btns ? ctx.height / 2 : p.mouseY;
+          let vx = (1.0 * (rx - ctx.vrT[0])) / ctx.vrS;
+          let vy = (1.0 * (ry - ctx.vrT[1])) / ctx.vrS;
+          let delta = e.delta / Math.abs(e.delta);
+          if (delta === -1) ctx.vrS *= 1.2;
+          else ctx.vrS /= 1.2;
+          ctx.vrT[0] = rx - vx * ctx.vrS;
+          ctx.vrT[1] = ry - vy * ctx.vrS;
+        }
+      };
+      p.mouseDragged = (e) => {
+        if (ctx.inCanvas && !ctx.lock) {
+          ctx.vrT[0] += p.movedX;
+          ctx.vrT[1] += p.movedY;
+          ctx.signals.dragging = true;
+        }
+        Point.apply(p => p.mouseDragged());
+      };
+      p.mousePressed = (e) => {
+        if (!ctx.lock && ctx.inCanvas && ctx.focusedSeries !== undefined)
+          ctx.focusedSeries.points.push(new Point(ctx, ctx.mvx, ctx.mvy).lock());
+      };
+      p.newSeries = () => new Series(ctx, []).focus();
+      p.dashedLine = (pattern = [5, 10, 30, 10]) => p.drawingContext.setLineDash(pattern);
+      p.solidLine = () => p.drawingContext.setLineDash([]);
+      let f = () => {
+        ctx.canvas = document.querySelector("#sketch > canvas");
+        if (ctx.canvas) p.windowResized();
+        else setTimeout(f, 10);
+      };
+      setTimeout(f, 0);
+    }, document.querySelector("#sketch"));
+  </script>
+</html>

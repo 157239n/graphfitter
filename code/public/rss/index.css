@@ -1,0 +1,276 @@
+body {
+  font-family: Lato;
+  margin: 0px;
+  font-size: 1.5em;
+  height: 100vh;
+}
+
+h2 {
+  font-size: 1.7em;
+  font-weight: 300;
+}
+
+#header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+a {
+  text-decoration: none;
+  color: blue;
+}
+
+#header > a {
+  font-size: 1.7em;
+  font-weight: 300;
+  flex-grow: 1;
+  padding: 10px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 3px 5px rgb(0 0 0 / 0.2);
+  color: #ccc;
+  transition: box-shadow 0.1s;
+  transition: color 0.1s;
+  cursor: pointer;
+  border-radius: 10px;
+  user-select: none;
+}
+
+#header > a:hover {
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.4);
+  color: #000;
+}
+
+#main {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1;
+}
+
+#overlay {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#overlay > * {
+  pointer-events: none;
+  user-select: none;
+}
+
+#sideBar {
+  flex: 1;
+}
+
+#sketchWrapper {
+  position: relative;
+  flex: 3;
+}
+
+#sketch {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#sketch > canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#wrapper {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn {
+  background-color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  display: flex;
+
+  box-shadow: 0 3px 5px rgb(0 0 0 / 0.2);
+  color: #666;
+  transition: box-shadow 0.1s;
+  transition: color 0.1s;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: all;
+}
+
+.btn:hover {
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.4);
+  color: #000;
+}
+
+.btn > * {
+  margin: auto;
+}
+
+.card {
+  padding: 20px 20px;
+  font-size: 1.5em;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.3);
+  color: #888;
+}
+
+.cardContent {
+  margin: 20px 30px;
+}
+
+.textBox {
+  display: flex;
+  flex-direction: row;
+}
+
+.textBox > input {
+  flex: 1;
+  margin-left: 15px;
+}
+
+.axp {
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.axp:hover {
+  box-shadow: 0 0px 10px rgb(0 0 0 / 0.8);
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  /*border: 1px black solid;*/
+}
+
+.toggle > input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle > span {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+.toggle > span:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+.toggle > input:checked + span {
+  background-color: #2196f3;
+}
+
+.toggle > input:focus + span {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+.toggle > input:checked + span:before {
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.toggle > span {
+  border-radius: 34px;
+}
+
+.toggle > span:before {
+  border-radius: 50%;
+}
+
+#axisContent input {
+  width: 15px;
+}
+
+#dataContent > div:last-child,
+#series > div {
+  box-shadow: 0 0px 3px rgb(0 0 0 / 0.5);
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+#dataContent > div:last-child:hover,
+#series > div:hover {
+  box-shadow: 0 0px 10px rgb(0 0 0 / 0.8);
+}
+
+#series > div.focused {
+  background-color: #faa;
+}
+
+#series > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+#series > div > div:nth-child(3),
+#series > div > div:nth-child(4) {
+  box-shadow: 0 0px 3px rgb(0 0 0 / 0.5);
+  padding: 10px;
+  margin-left: 10px;
+  border-radius: 10px;
+}
+
+#series > div > div:nth-child(3):hover,
+#series > div > div:nth-child(4):hover {
+  box-shadow: 0 0px 10px rgb(0 0 0 / 0.8);
+}
+
+#series > div:first-child > div:nth-child(3) {
+  pointer-events: none;
+}
+
+#exportContent > textarea {
+  border-radius: 15px;
+  padding: 15px;
+  resize: none;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+  width: 100%;
+}
+
+#exportContent > div {
+  color: #666;
+}
+
+#ex-raw {
+  margin-bottom: 15px;
+}
+
+#settingsContent > input {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+#settingsContent {
+  margin-bottom: 100px;
+}
