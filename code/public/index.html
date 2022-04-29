@@ -26,12 +26,24 @@
             <div style="flex: 1"></div>
             <div style="display: flex; flex-direction: column">
               <div style="margin: 20px">
-                <div class="btn" onclick="ctx.clearSketch()" title="Clear current sketch"><span><img src="rss/trash.svg" width="18" height="18" /></span></div>
-                <div class="btn" onclick="ctx.autoSave(true)" title="Save temporarily to cloud" style="margin-top: 15px;"><span><img src="rss/cloud-upload.svg" width="18" height="18" /></span></div>
-                <div class="btn" onclick="ctx.downloadJson()" title="Export to file" style="margin-top: 15px;"><span><img src="rss/download.svg" width="18" height="18" /></span></div>
-                <div class="btn" onclick="ctx.uploadJson()" title="Load from file" style="margin-top: 15px;"><span><img src="rss/upload.svg" width="18" height="18" /></span></div>
-                <div class="btn" onclick="ctx.expandAxis()" title="Expand axis to edge of image" style="margin-top: 15px;"><span><img src="rss/expand.svg" width="18" height="18" /></span></div>
-                <div class="btn" onclick="ctx.example()" title="Loads an example sketch" style="margin-top: 15px;"><span><img src="rss/document.svg" width="18" height="18" /></span></div>
+                <div class="btn" onclick="ctx.clearSketch()" title="Clear current sketch">
+                  <span><img src="rss/trash.svg" width="18" height="18" /></span>
+                </div>
+                <div class="btn" onclick="ctx.autoSave(true)" title="Save temporarily to cloud" style="margin-top: 15px">
+                  <span><img src="rss/cloud-upload.svg" width="18" height="18" /></span>
+                </div>
+                <div class="btn" onclick="ctx.downloadJson()" title="Export to file" style="margin-top: 15px">
+                  <span><img src="rss/download.svg" width="18" height="18" /></span>
+                </div>
+                <div class="btn" onclick="ctx.uploadJson()" title="Load from file" style="margin-top: 15px">
+                  <span><img src="rss/upload.svg" width="18" height="18" /></span>
+                </div>
+                <div class="btn" onclick="ctx.expandAxis()" title="Expand axis to edge of image" style="margin-top: 15px">
+                  <span><img src="rss/expand.svg" width="18" height="18" /></span>
+                </div>
+                <div class="btn" onclick="ctx.example()" title="Load an example sketch" style="margin-top: 15px">
+                  <span><img src="rss/document.svg" width="18" height="18" /></span>
+                </div>
               </div>
               <div style="flex: 1"></div>
               <div style="margin: 20px">
@@ -91,16 +103,16 @@
             <div class="card">4. Settings</div>
             <div class="cardContent" id="settingsContent">
               <div>Polyfit degree: <span>2</span></div>
-              <input id="set-deg" type="range" min="1" max="20" value="2" />
+              <input id="set-deg" type="range" min="1" max="20" value="8" />
               <div>Silkscreen transparency: <span>3</span></div>
               <input id="set-trans" type="range" min="0" max="255" value="150" />
               <input id="set-upload" type="file" style="display: none" />
               <div style="display: flex; flex-direction: row; margin-top: 20px">
-                <label class="toggle"><input type="checkbox" id="debug_t"><span></span></label>
+                <label class="toggle"><input type="checkbox" id="debug_t" /><span></span></label>
                 <div style="margin-left: 10px">Debug mode</div>
               </div>
               <div style="display: flex; flex-direction: row; margin-top: 20px">
-                <label class="toggle"><input type="checkbox" id="snap_t"><span></span></label>
+                <label class="toggle"><input type="checkbox" id="snap_t" checked /><span></span></label>
                 <div style="margin-left: 10px">Snap to geometry</div>
               </div>
             </div>
@@ -145,7 +157,7 @@
       ex: { raw: document.querySelector("#ex-raw"), polyfit: document.querySelector("#ex-polyfit") },
       signals: { img: false, log: false, deg: false, trans: false, dragging: false },
       fitLock: false,
-      avgs: {movedX: new MovingAverage(0), movedY: new MovingAverage(0), frameRate: new MovingAverage(0)}
+      avgs: { movedX: new MovingAverage(0), movedY: new MovingAverage(0), frameRate: new MovingAverage(0) },
     };
     Series.node = document.querySelector("#series");
     window.ctx = ctx;
@@ -168,10 +180,11 @@
     function genFit(_coeffs) {
       let coeffs = [..._coeffs];
       let n = coeffs.length;
-      let lx = Axis.X.log ? Math.log : (e => e);
-      let ly = Axis.Y.log ? Math.exp : (e => e);
+      let lx = Axis.X.log ? Math.log : (e) => e;
+      let ly = Axis.Y.log ? Math.exp : (e) => e;
       function inner(x) {
-        let answer = 0; x = lx(x);
+        let answer = 0;
+        x = lx(x);
         for (let i in coeffs) answer += coeffs[i] * x ** (n - i - 1);
         return ly(answer);
       }
@@ -199,8 +212,9 @@
               .then((res) => res.json())
               .then((data) => {
                 if (ctx.debug) console.log("Fitting data from server:", data);
-                let s = "", tallyS = "fs = [";
-                for (const k of Series.list.map(s => s.label)) {
+                let s = "",
+                  tallyS = "fs = [";
+                for (const k of Series.list.map((s) => s.label)) {
                   let coeffs = data[k];
                   if (!coeffs) continue;
                   s += `def ${k}f(x): ${Axis.X.log ? "x = np.log(x); " : ""}return ` + (Axis.Y.log ? "2.71828182**(" : "") + coeffs.map((coeff, i) => `${coeff}*x**${coeffs.length - i - 1}`).join(" + ") + (Axis.Y.log ? ")" : "") + "\n";
@@ -234,17 +248,19 @@
         Axis.Y.p2.value = h;
         Axis.X.log = false;
         Axis.Y.log = false;
-      } else toast.display("No image on the screen yet!");
-    }
+      } else toast.display("No image in the sketch yet!");
+    };
     ctx.clearSketch = () => {
       ctx.img = undefined;
       ctx.signals.img = true;
       Series.clear();
       Axis.initDims();
-    }
+    };
     ctx.example = () => {
-      fetch("/moody.json").then(res => res.json()).then(setState);
-    }
+      fetch("/moody.json")
+        .then((res) => res.json())
+        .then(setState);
+    };
     let getState = () => JSON.stringify({ img: ctx.img ? ctx.img.canvas.toDataURL() : null, deg: ctx.deg, trans: ctx.trans, snap: ctx.snap, debug: ctx.debug, vrS: ctx.vrS, vrT: ctx.vrT, axes: Axis.json, series: Series.json });
     let setState = (j) => {
       if (j.img !== null) loadBase64(j.img, false);
@@ -258,25 +274,27 @@
       set_trans.oninput();
       Axis.json = j.axes;
       Series.json = [ctx, j.series];
-    }
-    ctx.autoSave = (announces=false) =>
+    };
+    ctx.autoSave = (announces = false) =>
       fetch("/polyfit/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: getState(),
-      }).then(res => {
-        if (ctx.debug) console.log("Autosave successful")
-        if (announces) toast.display("Saved to cloud", 1000)
+      }).then((res) => {
+        if (ctx.debug) console.log("Autosave successful");
+        if (announces) toast.display("Saved to cloud", 1000);
       });
-    setInterval(ctx.autoSave, 10*1000);
+    setInterval(ctx.autoSave, 10 * 1000);
     ctx.autoLoad = () => {
       fetch("/polyfit/load", {
         method: "POST",
-      }).then(res => res.json()).then(data => {
-        if (Object.keys(data).length > 0) setState(data);
-      });
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (Object.keys(data).length > 0) setState(data);
+        });
     };
     setTimeout(ctx.autoLoad, 0);
     ctx.downloadJson = () => download(getState());
@@ -303,7 +321,7 @@
     Axis.Y = new Axis(ctx);
     Axis.init();
 
-    function loadBase64(s, init=true) {
+    function loadBase64(s, init = true) {
       ctx.p.loadImage(s, (img) => {
         img.loadPixels();
         let k1 = [0, -1, 0, -1, 4, -1, 0, -1, 0];
@@ -343,7 +361,7 @@
       ctx.signals.trans = true;
     };
     set_trans.oninput();
-    document.addEventListener("dblclick", e => e.stopPropagation());
+    document.addEventListener("dblclick", (e) => e.stopPropagation());
     new p5((p) => {
       /** @type {p5} p */
       ctx.p = p;
@@ -358,7 +376,7 @@
         p.scale(ctx.vrS);
         if (ctx.img !== undefined) {
           p.image(ctx.img, 0, 0);
-          p.fill(255, 255, 255, 255-ctx.trans);
+          p.fill(255, 255, 255, 255 - ctx.trans);
           p.rect(0, 0, ctx.img.width, ctx.img.height);
         } else {
           p.textSize(30);
@@ -367,10 +385,10 @@
         Point.apply((p) => p.draw());
         Axis.apply((ax) => ax.draw());
         Series.apply((s) => s.draw());
-        if (Series.list.length > 0 && Series.list.at(-1).points.length === 0) {
+        if (Series.list.length === 1 && Series.list.at(-1).points.length === 0) {
           p.textSize(30);
           p.noStroke();
-          p.text("Click anywhere to add the first point of the\nseries. Press <escape> to finish", 300, 300)
+          p.text("Click anywhere to add the first point of the\nseries. Press <escape> to finish", 300, 300);
         }
         p.pop();
         let [mgx, mgy] = ctx.vgT(ctx.mvx, ctx.mvy);
@@ -431,11 +449,10 @@
           ctx.vrT[1] += p.movedY;
           ctx.signals.dragging = true;
         }
-        Point.apply(p => p.mouseDragged());
+        Point.apply((p) => p.mouseDragged());
       };
       p.mousePressed = (e) => {
-        if (!ctx.lock && ctx.inCanvas && ctx.focusedSeries !== undefined)
-          ctx.focusedSeries.points.push(new Point(ctx, ctx.mvx, ctx.mvy).lock());
+        if (!ctx.lock && ctx.inCanvas && ctx.focusedSeries !== undefined) ctx.focusedSeries.points.push(new Point(ctx, ctx.mvx, ctx.mvy).lock());
       };
       p.newSeries = () => new Series(ctx, []).focus();
       p.dashedLine = (pattern = [5, 10, 30, 10]) => p.drawingContext.setLineDash(pattern);

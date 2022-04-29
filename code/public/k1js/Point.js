@@ -1,15 +1,38 @@
-let offsets = [[0, 0],
-               [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1],
-               [0, 2], [1, 2], [2, 2], [2, 1], [2, 0], [2, -1], [2, -2], [1, -2], [0, -2], [-1, -2], [-2, -2], [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-1, 2]]
+let offsets = [
+  [0, 0],
+  [0, 1],
+  [1, 1],
+  [1, 0],
+  [1, -1],
+  [0, -1],
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, 2],
+  [1, 2],
+  [2, 2],
+  [2, 1],
+  [2, 0],
+  [2, -1],
+  [2, -2],
+  [1, -2],
+  [0, -2],
+  [-1, -2],
+  [-2, -2],
+  [-2, -1],
+  [-2, 0],
+  [-2, 1],
+  [-2, 2],
+  [-1, 2],
+];
 offsets = [];
 for (let i = -10; i < 11; i += 1) {
   for (let j = -10; j < 11; j += 1) {
-    offsets.push([i, j, Math.sqrt(i**2+j**2)])
+    offsets.push([i, j, Math.sqrt(i ** 2 + j ** 2)]);
   }
 }
-offsets.sort((a,b) => Math.sign(a[2] - b[2] + Math.random()/100));
-offsets = offsets.slice(0, 100);
-
+offsets.sort((a, b) => Math.sign(a[2] - b[2] + Math.random() / 100));
+//offsets = offsets.slice(0, 100);
 
 export class Point {
   static list = [];
@@ -78,7 +101,7 @@ export class Point {
   interact() {
     let ctx = this.ctx;
     if (!this._lock && this.near(this.prop.r)) this.lock();
-    if (this._lock && !this.near(this.prop.r)) this.unlock();
+    if (this._lock && !this.near(this.prop.r) && !this.ctx.p.mouseIsPressed) this.unlock();
   }
 
   get prop() {
@@ -96,8 +119,14 @@ export class Point {
     Point.changed = false;
   }
 
-  _searchSnap() { // returns x, y from ix, iy
+  _searchSnap() {
+    // returns x, y from ix, iy
     let snapImg = this.ctx.snapImg;
+    if (snapImg === undefined) {
+      this.x = this.ix;
+      this.y = this.iy;
+      return;
+    }
     let ix = this.ix;
     let iy = this.iy;
     let debug = this.ctx.debug;
@@ -116,7 +145,7 @@ export class Point {
   }
 
   mouseDragged() {
-    if (this._lock && this.near(this.iProp.r * 2)) {
+    if (this._lock) {
       this.ix += this.ctx.p.movedX / this.ctx.vrS;
       this.iy += this.ctx.p.movedY / this.ctx.vrS;
       if (this.ctx.snap) {

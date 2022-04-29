@@ -94,11 +94,7 @@ export class Axis {
 
   static intermediaries() {
     let ctx = this.ctx;
-    if (
-      Axis.X.log !== Axis.X.logNode.checked ||
-      Axis.Y.log !== Axis.Y.logNode.checked
-    )
-      Axis.logChanged = true;
+    if (Axis.X.log !== Axis.X.logNode.checked || Axis.Y.log !== Axis.Y.logNode.checked) Axis.logChanged = true;
     Axis.X.log = Axis.X.logNode.checked;
     Axis.Y.log = Axis.Y.logNode.checked;
   }
@@ -130,11 +126,7 @@ export class Axis {
   }
 
   interact() {
-    if (
-      this._lastValues[0] !== this.p1.value ||
-      this._lastValues[1] !== this.p2.value
-    )
-      this.valueChanged = true;
+    if (this._lastValues[0] !== this.p1.value || this._lastValues[1] !== this.p2.value) this.valueChanged = true;
     this._lastValues = [this.p1.value, this.p2.value];
   }
 
@@ -160,11 +152,7 @@ export class Axis {
     p.strokeWeight(1 / vrS);
     p.line(p1.x, p1.y, p2.x, p2.y);
     let n = 5;
-    let values = (this.log ? loglinspace : linspace)(
-      this.p1.value,
-      this.p2.value,
-      n
-    );
+    let values = (this.log ? loglinspace : linspace)(this.p1.value, this.p2.value, n);
     let xs = linspace(p1.x, p2.x, n);
     let ys = linspace(p1.y, p2.y, n);
     p.fill(0, 0, 0);

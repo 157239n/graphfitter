@@ -147,12 +147,7 @@ export class Series {
   }
 
   get graphDataS() {
-    if (this.ctx.vgT !== undefined)
-      return (
-        `${this.label} = [` +
-        this.graphData.map((v) => `[${v[0]}, ${v[1]}]`).join(", ") +
-        "]\n"
-      );
+    if (this.ctx.vgT !== undefined) return `${this.label} = [` + this.graphData.map((v) => `[${v[0]}, ${v[1]}]`).join(", ") + "]\n";
     return "";
   }
 
@@ -164,8 +159,7 @@ export class Series {
 
   _drawLines(vps) {
     let p = this.ctx.p;
-    for (let i = 0; i < vps.length - 1; i++)
-      p.line(vps[i].x, vps[i].y, vps[i + 1].x, vps[i + 1].y);
+    for (let i = 0; i < vps.length - 1; i++) p.line(vps[i].x, vps[i].y, vps[i + 1].x, vps[i + 1].y);
   }
 
   draw() {
@@ -187,21 +181,13 @@ export class Series {
     p.strokeWeight(wt);
     this._drawLines(this.points);
     p.dashedLine([1, 1]);
-    if (
-      this.ctx.gvT !== undefined &&
-      this.fitFn !== undefined &&
-      this.points.length >= 2
-    ) {
+    if (this.ctx.gvT !== undefined && this.fitFn !== undefined && this.points.length >= 2) {
       let f = this.fitFn;
       let gvT = this.ctx.gvT;
       let vgT = this.ctx.vgT;
       let p1 = this.points.at(0);
       let p2 = this.points.at(-1);
-      let gxs = (Axis.X.log ? loglinspace : linspace)(
-        vgT(p1.x, p1.y)[0],
-        vgT(p2.x, p2.y)[0],
-        100
-      );
+      let gxs = (Axis.X.log ? loglinspace : linspace)(vgT(p1.x, p1.y)[0], vgT(p2.x, p2.y)[0], 100);
       p.strokeWeight(wt / 2);
       this._drawLines(gxs.map((gx) => gvT(gx, f(gx))));
     }

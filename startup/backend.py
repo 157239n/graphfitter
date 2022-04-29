@@ -27,6 +27,10 @@ class Saves:
         return "{}"
 saves = Saves(100)
 
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+
 @app.route("/fit", methods=["POST"])
 def getState():
     json = request.json; data = json["data"]; deg = json["deg"]

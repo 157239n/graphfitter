@@ -7,8 +7,7 @@ import { htmlToElement } from "./utils.js";
 class Toast {
   constructor() {
     /** @type {number} this.instances */ this.instances = 0; // this is so that only the latest call's turnOff() will actually turn it off
-    /** @type {jQuery} this.objectReference */ this.objectReference =
-      document.querySelector("#toast");
+    /** @type {jQuery} this.objectReference */ this.objectReference = document.querySelector("#toast");
   }
 
   /**
@@ -24,22 +23,11 @@ class Toast {
     setTimeout(this.turnOff, timeout);
   }
 
-  displayOfflineMessage = (content) =>
-    this.display(
-      content + " Please check your internet connection, or report an issue"
-    );
+  displayOfflineMessage = (content) => this.display(content + " Please check your internet connection, or report an issue");
   /** Displays a message, and keeps it online until another display() is called. */
-  persistTillNextDisplay = (content) => (
-    (this.objectReference.innerHTML = content),
-    this.objectReference.classList.remove("activated")
-  );
+  persistTillNextDisplay = (content) => ((this.objectReference.innerHTML = content), this.objectReference.classList.remove("activated"));
   /** Fades out the toast. Expected to be called by a timeout only. */
-  turnOff = () => (
-    toast.instances === 1
-      ? toast.objectReference.classList.remove("activated")
-      : "",
-    toast.instances--
-  );
+  turnOff = () => (toast.instances === 1 ? toast.objectReference.classList.remove("activated") : "", toast.instances--);
 }
 
 document.body.append(htmlToElement(`<div id="toast"></div>`));
