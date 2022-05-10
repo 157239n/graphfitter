@@ -151,6 +151,7 @@
       mvx: 0,
       mvy: 0,
       debug: true, // displays extra stuff on screen
+      draggingOver: false, // dragging files over to sketch
       Series: Series,
       Point: Point,
       Axis: Axis,
@@ -336,8 +337,7 @@
       });
     }
 
-    document.onpaste = (event) => {
-      let items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    function loadItems(items) {
       for (let idx in items) {
         let item = items[idx];
         if (item.kind === "file") {
@@ -346,7 +346,26 @@
           reader.readAsDataURL(item.getAsFile());
         }
       }
+    }
+
+    document.onpaste = (event) => {
+      loadItems((event.clipboardData || event.originalEvent.clipboardData).items)
     };
+
+    let overlay = document.querySelector("#sketchWrapper");
+    overlay.ondrop = (e) => {
+      e.preventDefault();
+      loadItems(e.dataTransfer.items);
+      ctx.draggingOver = false;
+    }
+    overlay.ondragover = (e) => {
+      e.preventDefault();
+      ctx.draggingOver = true;
+    }
+    overlay.ondragleave = (e) => {
+      e.preventDefault();
+      ctx.draggingOver = false;
+    }
     let [set_deg, set_trans] = Array.from(document.querySelectorAll("#settingsContent > input")).slice(0, 2);
     let [set_deg_val, set_trans_val] = Array.from(document.querySelectorAll("#settingsContent > div > span")).slice(0, 2);
     set_deg.oninput = () => {
@@ -380,7 +399,8 @@
           p.rect(0, 0, ctx.img.width, ctx.img.height);
         } else {
           p.textSize(30);
-          p.text("Paste in an image to get started", 150, 150);
+          if (ctx.draggingOver) p.text("Release to drop image", 150, 150);
+          else p.text("Paste/drag in an image to get started", 150, 150);
         }
         Point.apply((p) => p.draw());
         Axis.apply((ax) => ax.draw());
