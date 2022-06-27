@@ -1,5 +1,8 @@
-<html>
+<html lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name='description' content='A service that allows you to paste in a graph, set the axes, add in multiple series and fit them to polynomials.' />
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="/rss/index.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,22 +30,22 @@
             <div style="display: flex; flex-direction: column">
               <div style="margin: 20px">
                 <div class="btn" onclick="ctx.clearSketch()" title="Clear current sketch">
-                  <span><img src="rss/trash.svg" width="18" height="18" /></span>
+                  <span><img src="rss/trash.svg" width="18" height="18" alt="trash" /></span>
                 </div>
                 <div class="btn" onclick="ctx.autoSave(true)" title="Save temporarily to cloud" style="margin-top: 15px">
-                  <span><img src="rss/cloud-upload.svg" width="18" height="18" /></span>
+                  <span><img src="rss/cloud-upload.svg" width="18" height="18" alt="cloud-upload" /></span>
                 </div>
                 <div class="btn" onclick="ctx.downloadJson()" title="Export to file" style="margin-top: 15px">
-                  <span><img src="rss/download.svg" width="18" height="18" /></span>
+                  <span><img src="rss/download.svg" width="18" height="18" alt="download" /></span>
                 </div>
                 <div class="btn" onclick="ctx.uploadJson()" title="Load from file" style="margin-top: 15px">
-                  <span><img src="rss/upload.svg" width="18" height="18" /></span>
+                  <span><img src="rss/upload.svg" width="18" height="18" alt="upload" /></span>
                 </div>
                 <div class="btn" onclick="ctx.expandAxis()" title="Expand axis to edge of image" style="margin-top: 15px">
-                  <span><img src="rss/expand.svg" width="18" height="18" /></span>
+                  <span><img src="rss/expand.svg" width="18" height="18" alt="expand" /></span>
                 </div>
                 <div class="btn" onclick="ctx.example()" title="Load an example sketch" style="margin-top: 15px">
-                  <span><img src="rss/document.svg" width="18" height="18" /></span>
+                  <span><img src="rss/document.svg" width="18" height="18" alt="document" /></span>
                 </div>
               </div>
               <div style="flex: 1"></div>
