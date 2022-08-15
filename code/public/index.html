@@ -178,7 +178,7 @@
       ctx.avgs.movedX.value = p.movedX;
       ctx.avgs.movedY.value = p.movedY;
       ctx.avgs.frameRate.value = p.frameRate();
-      if (ctx.canvas !== undefined) ctx.inCanvas = 0 <= p.mouseX && p.mouseX < ctx.canvas.width && 0 <= p.mouseY && p.mouseY < ctx.canvas.height;
+      if (ctx.canvas) ctx.inCanvas = 0 <= p.mouseX && p.mouseX < ctx.canvas.width && 0 <= p.mouseY && p.mouseY < ctx.canvas.height;
       vg(ctx);
     }
     function genFit(_coeffs) {
@@ -239,7 +239,7 @@
     }
     let set_upload = document.querySelector("#set-upload");
     ctx.expandAxis = () => {
-      if (ctx.img !== undefined) {
+      if (ctx.img) {
         let w = ctx.img.width;
         let h = ctx.img.height;
         Axis.X.p1.js.xy = [0, h];
@@ -396,7 +396,7 @@
         p.push();
         p.translate(...ctx.vrT);
         p.scale(ctx.vrS);
-        if (ctx.img !== undefined) {
+        if (ctx.img) {
           p.image(ctx.img, 0, 0);
           p.fill(255, 255, 255, 255 - ctx.trans);
           p.rect(0, 0, ctx.img.width, ctx.img.height);
@@ -441,17 +441,17 @@
           p.text(`movedXY avg: ${ctx.avgs.movedX.value.toFixed(3)} ${ctx.avgs.movedY.value.toFixed(3)}`, 15, 200);
           p.text(`mouse dragging: ${ctx.signals.dragging}`, 15, 220);
         }
-        // if (ctx.vgT !== undefined)
+        // if (ctx.vgT)
         //   console.log([ctx.mvx, ctx.mvy], ctx.vgT({x: ctx.mvx, y: ctx.mvy}));
         clearSignal(ctx.signals);
       };
       p.windowResized = () => {
-        if (ctx.canvas !== undefined) p.resizeCanvas(ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+        if (ctx.canvas) p.resizeCanvas(ctx.canvas.clientWidth, ctx.canvas.clientHeight);
         ctx.width = ctx.canvas.clientWidth;
         ctx.height = ctx.canvas.clientHeight;
       };
       p.keyReleased = (e) => {
-        if (p.key === "Escape" && ctx.focusedSeries !== undefined) ctx.focusedSeries.unfocus();
+        if (p.key === "Escape" && ctx.focusedSeries) ctx.focusedSeries.unfocus();
       };
       p.mouseWheel = (e) => {
         if (ctx.inCanvas) {
@@ -475,7 +475,7 @@
         Point.apply((p) => p.mouseDragged());
       };
       p.mousePressed = (e) => {
-        if (!ctx.lock && ctx.inCanvas && ctx.focusedSeries !== undefined) ctx.focusedSeries.points.push(new Point(ctx, ctx.mvx, ctx.mvy).lock());
+        if (!ctx.lock && ctx.inCanvas && ctx.focusedSeries) ctx.focusedSeries.points.push(new Point(ctx, ctx.mvx, ctx.mvy).lock());
       };
       p.newSeries = () => new Series(ctx, []).focus();
       p.dashedLine = (pattern = [5, 10, 30, 10]) => p.drawingContext.setLineDash(pattern);
